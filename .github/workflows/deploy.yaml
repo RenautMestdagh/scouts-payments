@@ -1,0 +1,51 @@
+name: Deploy project
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+  
+jobs:
+  docker-build-and-push:
+      runs-on: ubuntu-latest
+      steps:
+        - name: checkout repo
+          uses: actions/checkout@v2
+
+        - name: Set up QEMU
+          uses: docker/setup-qemu-action@v3
+      
+        - name: Set up Docker Buildx
+          uses: docker/setup-buildx-action@v3
+
+        - name: Login to DockerHub
+          uses: docker/login-action@v3
+          with:
+            username: ${{ vars.DOCKERHUB_USERNAME }}
+            password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+        - name: Build and push
+          uses: docker/build-push-action@v3
+          with:
+            context: ./
+            platforms: linux/amd64,linux/arm64
+            file: ./Dockerfile
+            push: true
+            tags: ${{ vars.DOCKERHUB_USERNAME }}/scoutspayments:latest
+
+  deploy-to-server:
+    needs: docker-build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ vars.SSH_HOST }}
+          username: ${{ vars.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            sudo docker compose pull payments_service
+            sudo docker compose up -d payments_service
+            sudo docker image prune -f
