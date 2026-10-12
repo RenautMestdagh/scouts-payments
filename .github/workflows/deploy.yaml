@@ -33,19 +33,3 @@ jobs:
             file: ./Dockerfile
             push: true
             tags: ${{ vars.DOCKERHUB_USERNAME }}/scoutspayments:latest
-
-  deploy-to-server:
-    needs: docker-build-and-push
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ vars.SSH_HOST }}
-          username: ${{ vars.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            sudo docker compose pull payments_service
-            sudo docker compose up -d payments_service
-            sudo docker image prune -f
