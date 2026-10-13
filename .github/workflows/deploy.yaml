@@ -33,3 +33,25 @@ jobs:
             file: ./Dockerfile
             push: true
             tags: ${{ vars.DOCKERHUB_USERNAME }}/scoutspayments:latest
+
+        # Komodo pulls :latest and recreates the container. The API key belongs to a
+        # Komodo service user that may only deploy the scouts-payments stack.
+        - name: Deploy on webhosting via Komodo
+          env:
+            KOMODO_URL: https://komodo.rennet.duckdns.org
+            KOMODO_API_KEY: ${{ secrets.KOMODO_API_KEY }}
+            KOMODO_API_SECRET: ${{ secrets.KOMODO_API_SECRET }}
+          run: |
+            komodo() {
+              curl -sSf -X POST "$KOMODO_URL/$1" \
+                -H "x-api-key: $KOMODO_API_KEY" -H "x-api-secret: $KOMODO_API_SECRET" \
+                -H "content-type: application/json" -d "$2"
+            }
+            id=$(komodo execute/DeployStack '{"stack":"scouts-payments"}' | jq -r '._id["$oid"]')
+            for i in $(seq 60); do
+              update=$(komodo read/GetUpdate "{\"id\":\"$id\"}")
+              [ "$(echo "$update" | jq -r .status)" = "Complete" ] && break
+              sleep 5
+            done
+            echo "$update" | jq -r '.logs[] | "## \(.stage)\n\(.stdout)\(.stderr)"'
+            [ "$(echo "$update" | jq -r .success)" = "true" ]
