@@ -55,7 +55,9 @@ jobs:
           KOMODO_CLI_KEY: ${{ secrets.KOMODO_API_KEY }}
           KOMODO_CLI_SECRET: ${{ secrets.KOMODO_API_SECRET }}
         run: |
+          # The CLI image ships without CA certificates, borrow the runner's for HTTPS
           docker run --rm -e KOMODO_CLI_HOST -e KOMODO_CLI_KEY -e KOMODO_CLI_SECRET \
+            -v /etc/ssl/certs:/etc/ssl/certs:ro \
             ghcr.io/moghtech/komodo-cli:2.3.3 \
             km deploy -y stack scouts-payments 2>&1 | tee km.log
           # km exits 0 even when the deploy fails
