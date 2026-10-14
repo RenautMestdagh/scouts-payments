@@ -3,13 +3,14 @@ const router = express.Router();
 const axios = require("axios");
 const jose = require('jose');
 const socketapi = require("../utils/socketapi");
+const readSecret = require("../utils/readSecret");
 
 const toScan = new Map(); // key = paymentID, value = timestamp
 const PAYCONIQ_BASE_URL = 'https://merchant.api.bancontact.net/v3/payments';
 const PAYCONIQ_CERT_URL = 'https://jwks.bancontact.net/';
 
 const headers = {
-    Authorization: `Bearer ${process.env.PAYCONIQ_BEARER}`,
+    Authorization: `Bearer ${readSecret('PAYCONIQ_BEARER')}`,
     'Cache-Control': 'no-cache',
     'Content-Type': 'application/json',
 };
