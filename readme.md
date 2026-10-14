@@ -42,7 +42,7 @@ AMOUNTS=5;10;15;20;30;50
 ```
 
 **Environment Variables:**
-- `PAYCONIQ_BEARER` (required): Your Payconiq API bearer token
+- `PAYCONIQ_BEARER` (required): Your Payconiq API bearer token (or `PAYCONIQ_BEARER_FILE` with a path to a file containing it, e.g. a Docker secret under `/run/secrets/`; takes precedence when set)
 - `AMOUNTS` (optional): Semicolon-separated list of 6 payment amounts in euros. Defaults to `5;10;15;20;30;50` if not provided or invalid
 
 4. Start the application:
