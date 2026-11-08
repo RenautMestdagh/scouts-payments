@@ -127,7 +127,7 @@ router.post('/callback', async (req, res) => {
         const jwt = `${encodedHeader}.${encodedPayload}.${encodedSignature}`;
 
         // JWT verification options with critical headers
-        const decodedHeader = JSON.parse(jose.base64url.decode(encodedHeader));
+        const decodedHeader = jose.decodeProtectedHeader(jwt);
         const options = {
             // Whitelist the critical headers so 'jose' doesn't reject the token
             crit: Object.fromEntries(decodedHeader.crit.map(h => [h, true])),
