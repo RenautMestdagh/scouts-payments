@@ -35,7 +35,9 @@ cd scouts_payments
 npm install
 ```
 
-3. Create a `.env` file in the root directory:
+3. The local values are in Infisical (homelab-webhosting → Development → `/scouts-payments`);
+   `npm run devstart` loads them through the [Infisical CLI](https://infisical.com/docs/cli/overview)
+   (`infisical login` once). Without it, copy `.env.example` to `.env` and fill it in, e.g.:
 ```env
 PAYCONIQ_BEARER=your_payconiq_bearer_token_here
 AMOUNTS=5;10;15;20;30;50
